@@ -8,16 +8,18 @@ import com.epam.engx.cleancode.finaltask.task1.thirdpartyjar.View;
 
 import java.util.List;
 
-
 public class Print implements Command {
+
+    private static final String LEFT_UPPER_CORNER = "╔";
+    private static final String RIGHT_UPPER_CORNER = "╗";
+    private static final String NEW_LINE = "\n";
+    private static final String LEFT_CORNER_SYMBOL = "╚";
+    private static final String HORIZONTAL_LINE_BORDER_SYMBOL = "═";
+    public static final String VERTICAL_LINE_BORDER_SYMBOL = "║";
 
     private View view;
     private DatabaseManager manager;
     private String tableName;
-
-    private static final String NEW_LINE = "\n";
-    private static final String LEFT_CORNER_SYMBOL = "╚";
-    private static final String EGYENLO = "═";
 
     public Print(View view, DatabaseManager manager) {
         this.view = view;
@@ -55,18 +57,18 @@ public class Print implements Command {
 
     private String getEmptyTable(String tableName) {
         String textEmptyTable = "║ Table '" + tableName + "' is empty or does not exist ║";
-        String result = "╔";
+        StringBuilder result = new StringBuilder(LEFT_UPPER_CORNER);
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
-            result += EGYENLO;
+            result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
         }
-        result += "╗\n";
-        result += textEmptyTable + NEW_LINE;
-        result += LEFT_CORNER_SYMBOL;
+        result.append(RIGHT_UPPER_CORNER).append(NEW_LINE);
+        result.append(textEmptyTable + NEW_LINE);
+        result.append(LEFT_CORNER_SYMBOL);
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
-            result += EGYENLO;
+            result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
         }
-        result += "╝\n";
-        return result;
+        result.append("╝\n");
+        return result.toString();
     }
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
@@ -104,7 +106,7 @@ public class Print implements Command {
         int columnCount = getColumnCount(dataSets);
         for (int row = 0; row < rowsCount; row++) {
             List<Object> values = dataSets.get(row).getValues();
-            result += "║";
+            result += VERTICAL_LINE_BORDER_SYMBOL;
             for (int column = 0; column < columnCount; column++) {
                 int valuesLength = String.valueOf(values.get(column)).length();
                 if (valuesLength % 2 == 0) {
@@ -115,7 +117,7 @@ public class Print implements Command {
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
                         result += " ";
                     }
-                    result += "║";
+                    result += VERTICAL_LINE_BORDER_SYMBOL;
                 } else {
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
                         result += " ";
@@ -124,7 +126,7 @@ public class Print implements Command {
                     for (int j = 0; j <= (maxColumnSize - valuesLength) / 2; j++) {
                         result += " ";
                     }
-                    result += "║";
+                    result += VERTICAL_LINE_BORDER_SYMBOL;
                 }
             }
             result += NEW_LINE;
@@ -132,12 +134,12 @@ public class Print implements Command {
                 result += "╠";
                 for (int j = 1; j < columnCount; j++) {
                     for (int i = 0; i < maxColumnSize; i++) {
-                        result += EGYENLO;
+                        result += HORIZONTAL_LINE_BORDER_SYMBOL;
                     }
                     result += "╬";
                 }
                 for (int i = 0; i < maxColumnSize; i++) {
-                    result += EGYENLO;
+                    result += HORIZONTAL_LINE_BORDER_SYMBOL;
                 }
                 result += "╣\n";
             }
@@ -145,12 +147,12 @@ public class Print implements Command {
         result += LEFT_CORNER_SYMBOL;
         for (int j = 1; j < columnCount; j++) {
             for (int i = 0; i < maxColumnSize; i++) {
-                result += EGYENLO;
+                result += HORIZONTAL_LINE_BORDER_SYMBOL;
             }
             result += "╩";
         }
         for (int i = 0; i < maxColumnSize; i++) {
-            result += EGYENLO;
+            result += HORIZONTAL_LINE_BORDER_SYMBOL;
         }
         result += "╝\n";
         return result;
@@ -170,22 +172,22 @@ public class Print implements Command {
         } else {
             maxColumnSize += 3;
         }
-        result += "╔";
+        result += LEFT_UPPER_CORNER;
         for (int j = 1; j < columnCount; j++) {
             for (int i = 0; i < maxColumnSize; i++) {
-                result += EGYENLO;
+                result += HORIZONTAL_LINE_BORDER_SYMBOL;
             }
             result += "╦";
         }
         for (int i = 0; i < maxColumnSize; i++) {
-            result += EGYENLO;
+            result += HORIZONTAL_LINE_BORDER_SYMBOL;
         }
-        result += "╗\n";
+        result += RIGHT_UPPER_CORNER + NEW_LINE;
         List<String> columnNames = dataSets.get(0).getColumnNames();
         for (int column = 0; column < columnCount; column++) {
-            result += "║";
+            result += VERTICAL_LINE_BORDER_SYMBOL;
             int columnNamesLength = columnNames.get(column).length();
-            if (columnNamesLength % 2 == 0) {
+            if (isColumnNamesLengthEven(columnNamesLength)) {
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
                     result += " ";
                 }
@@ -210,28 +212,32 @@ public class Print implements Command {
             result += "╠";
             for (int j = 1; j < columnCount; j++) {
                 for (int i = 0; i < maxColumnSize; i++) {
-                    result += EGYENLO;
+                    result += HORIZONTAL_LINE_BORDER_SYMBOL;
                 }
                 result += "╬";
             }
             for (int i = 0; i < maxColumnSize; i++) {
-                result += EGYENLO;
+                result += HORIZONTAL_LINE_BORDER_SYMBOL;
             }
             result += "╣\n";
         } else {
             result += LEFT_CORNER_SYMBOL;
             for (int j = 1; j < columnCount; j++) {
                 for (int i = 0; i < maxColumnSize; i++) {
-                    result += EGYENLO;
+                    result += HORIZONTAL_LINE_BORDER_SYMBOL;
                 }
                 result += "╩";
             }
             for (int i = 0; i < maxColumnSize; i++) {
-                result += EGYENLO;
+                result += HORIZONTAL_LINE_BORDER_SYMBOL;
             }
             result += "╝\n";
         }
         return result;
+    }
+
+    private boolean isColumnNamesLengthEven(int columnNamesLength) {
+        return columnNamesLength % 2 == 0;
     }
 
     private boolean hasDataSets(List<DataSet> dataSets) {
