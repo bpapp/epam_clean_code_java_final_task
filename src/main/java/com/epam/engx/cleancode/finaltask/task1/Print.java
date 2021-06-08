@@ -1,11 +1,10 @@
 package com.epam.engx.cleancode.finaltask.task1;
 
 
-
 import com.epam.engx.cleancode.finaltask.task1.thirdpartyjar.Command;
 import com.epam.engx.cleancode.finaltask.task1.thirdpartyjar.DataSet;
-import com.epam.engx.cleancode.finaltask.task1.thirdpartyjar.View;
 import com.epam.engx.cleancode.finaltask.task1.thirdpartyjar.DatabaseManager;
+import com.epam.engx.cleancode.finaltask.task1.thirdpartyjar.View;
 
 import java.util.List;
 
@@ -16,28 +15,37 @@ public class Print implements Command {
     private DatabaseManager manager;
     private String tableName;
 
+    private static final String NEW_LINE = "\n";
+    private static final String LEFT_CORNER_SYMBOL = "╚";
+    private static final String EGYENLO = "═";
+
     public Print(View view, DatabaseManager manager) {
         this.view = view;
         this.manager = manager;
     }
 
+    @Override
     public boolean canProcess(String command) {
         return command.startsWith("print ");
     }
 
+    @Override
     public void process(String input) {
         String[] command = input.split(" ");
-        if (command.length != 2) {
-            throw new IllegalArgumentException("incorrect number of parameters. Expected 1, but is " + (command.length - 1));
-        }
+        validateCommandLength(command);
         tableName = command[1];
         List<DataSet> data = manager.getTableData(tableName);
         view.write(getTableString(data));
     }
 
+    private void validateCommandLength(String[] command) {
+        if (command.length != 2) {
+            throw new IllegalArgumentException("incorrect number of parameters. Expected 1, but is " + (command.length - 1));
+        }
+    }
+
     private String getTableString(List<DataSet> data) {
-        int maxColumnSize;
-        maxColumnSize = getMaxColumnSize(data);
+        int maxColumnSize = getMaxColumnSize(data);
         if (maxColumnSize == 0) {
             return getEmptyTable(tableName);
         } else {
@@ -49,13 +57,13 @@ public class Print implements Command {
         String textEmptyTable = "║ Table '" + tableName + "' is empty or does not exist ║";
         String result = "╔";
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
-            result += "═";
+            result += EGYENLO;
         }
         result += "╗\n";
-        result += textEmptyTable + "\n";
-        result += "╚";
+        result += textEmptyTable + NEW_LINE;
+        result += LEFT_CORNER_SYMBOL;
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
-            result += "═";
+            result += EGYENLO;
         }
         result += "╝\n";
         return result;
@@ -63,7 +71,7 @@ public class Print implements Command {
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
         int maxLength = 0;
-        if (dataSets.size() > 0) {
+        if (hasDataSets(dataSets)) {
             List<String> columnNames = dataSets.get(0).getColumnNames();
             for (String columnName : columnNames) {
                 if (columnName.length() > maxLength) {
@@ -119,41 +127,38 @@ public class Print implements Command {
                     result += "║";
                 }
             }
-            result += "\n";
+            result += NEW_LINE;
             if (row < rowsCount - 1) {
                 result += "╠";
                 for (int j = 1; j < columnCount; j++) {
                     for (int i = 0; i < maxColumnSize; i++) {
-                        result += "═";
+                        result += EGYENLO;
                     }
                     result += "╬";
                 }
                 for (int i = 0; i < maxColumnSize; i++) {
-                    result += "═";
+                    result += EGYENLO;
                 }
                 result += "╣\n";
             }
         }
-        result += "╚";
+        result += LEFT_CORNER_SYMBOL;
         for (int j = 1; j < columnCount; j++) {
             for (int i = 0; i < maxColumnSize; i++) {
-                result += "═";
+                result += EGYENLO;
             }
             result += "╩";
         }
         for (int i = 0; i < maxColumnSize; i++) {
-            result += "═";
+            result += EGYENLO;
         }
         result += "╝\n";
         return result;
     }
 
     private int getColumnCount(List<DataSet> dataSets) {
-        int result = 0;
-        if (dataSets.size() > 0) {
-            return dataSets.get(0).getColumnNames().size();
-        }
-        return result;
+        return hasDataSets(dataSets) ?
+                dataSets.get(0).getColumnNames().size() : 0;
     }
 
     private String getHeaderOfTheTable(List<DataSet> dataSets) {
@@ -168,12 +173,12 @@ public class Print implements Command {
         result += "╔";
         for (int j = 1; j < columnCount; j++) {
             for (int i = 0; i < maxColumnSize; i++) {
-                result += "═";
+                result += EGYENLO;
             }
             result += "╦";
         }
         for (int i = 0; i < maxColumnSize; i++) {
-            result += "═";
+            result += EGYENLO;
         }
         result += "╗\n";
         List<String> columnNames = dataSets.get(0).getColumnNames();
@@ -201,31 +206,35 @@ public class Print implements Command {
         result += "║\n";
 
         //last string of the header
-        if (dataSets.size() > 0) {
+        if (hasDataSets(dataSets)) {
             result += "╠";
             for (int j = 1; j < columnCount; j++) {
                 for (int i = 0; i < maxColumnSize; i++) {
-                    result += "═";
+                    result += EGYENLO;
                 }
                 result += "╬";
             }
             for (int i = 0; i < maxColumnSize; i++) {
-                result += "═";
+                result += EGYENLO;
             }
             result += "╣\n";
         } else {
-            result += "╚";
+            result += LEFT_CORNER_SYMBOL;
             for (int j = 1; j < columnCount; j++) {
                 for (int i = 0; i < maxColumnSize; i++) {
-                    result += "═";
+                    result += EGYENLO;
                 }
                 result += "╩";
             }
             for (int i = 0; i < maxColumnSize; i++) {
-                result += "═";
+                result += EGYENLO;
             }
             result += "╝\n";
         }
         return result;
+    }
+
+    private boolean hasDataSets(List<DataSet> dataSets) {
+        return dataSets.size() > 0;
     }
 }
