@@ -20,6 +20,9 @@ public class Print implements Command {
     private static final String HORIZONTAL_LINE_BORDER_SYMBOL = "═";
     private static final String VERTICAL_LINE_BORDER_SYMBOL = "║";
     private static final String COLUMN_SEPARATOR = "╦";
+    private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT = "╣";
+    private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT = "╠";
+    private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT = "╬";
     private static final int TABLE_NAME_INDEX = 1;
 
     private View view;
@@ -38,14 +41,14 @@ public class Print implements Command {
 
     @Override
     public void process(String input) {
-        String[] command = splitBySpace(input);
+        String[] command = splitInputBySpace(input);
         validateCommandLength(command);
         tableName = command[TABLE_NAME_INDEX];
         List<DataSet> data = manager.getTableData(tableName);
         view.write(getTableString(data));
     }
 
-    private String[] splitBySpace(String input) {
+    private String[] splitInputBySpace(String input) {
         return input.split(" ");
     }
 
@@ -56,24 +59,34 @@ public class Print implements Command {
     }
 
     private String getTableString(List<DataSet> data) {
-        int maxColumnSize = getMaxColumnSize(data);
-        if (maxColumnSize == 0) {
-            return getEmptyTable(tableName);
-        } else {
-            return getHeaderOfTheTable(data) + getStringTableData(data);
-        }
+        return hasNoColumnSize(getMaxColumnSize(data)) ?
+                getEmptyTable(tableName) :
+                getHeaderOfTheTable(data) + getStringTableData(data);
+    }
+
+    private boolean hasNoColumnSize(int maxColumnSize) {
+        return maxColumnSize == 0;
     }
 
     private String getEmptyTable(String tableName) {
         String textEmptyTable = "║ Table '" + tableName + "' is empty or does not exist ║";
-        StringBuilder result = new StringBuilder(UPPER_LEFT_CORNER_SYMBOL);
+        StringBuilder result = new StringBuilder();
+        getEmptyTableHeader(textEmptyTable, result);
+        getEmptyTableBody(textEmptyTable, result);
+        getEmptyTableFooter(textEmptyTable, result);
+        return result.toString();
+    }
+
+    private void getEmptyTableHeader(String textEmptyTable, StringBuilder result) {
+        result.append(UPPER_LEFT_CORNER_SYMBOL);
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
             result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
         }
         result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+    }
+
+    private void getEmptyTableBody(String textEmptyTable, StringBuilder result) {
         result.append(textEmptyTable + NEW_LINE);
-        getEmptyTableFooter(textEmptyTable, result);
-        return result.toString();
     }
 
     private void getEmptyTableFooter(String textEmptyTable, StringBuilder result) {
@@ -119,64 +132,63 @@ public class Print implements Command {
     private String getStringTableData(List<DataSet> dataSets) {
         int rowsCount = dataSets.size();
         int maxColumnSize = getMaxColumnSize(dataSets);
-        String result = "";
+        StringBuilder tableDataContent = new StringBuilder();
         maxColumnSize = incrementMaxColumnSize(maxColumnSize);
         int columnCount = getColumnCount(dataSets);
         for (int row = 0; row < rowsCount; row++) {
             List<Object> values = dataSets.get(row).getValues();
-            result += VERTICAL_LINE_BORDER_SYMBOL;
+            tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
             for (int column = 0; column < columnCount; column++) {
                 int valuesLength = String.valueOf(values.get(column)).length();
                 if (valuesLength % 2 == 0) {
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-                        result += " ";
+                        tableDataContent.append(" ");
                     }
-                    result += String.valueOf(values.get(column));
+                    tableDataContent.append(values.get(column));
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-                        result += " ";
+                        tableDataContent.append(" ");
                     }
-                    result += VERTICAL_LINE_BORDER_SYMBOL;
+                    tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
                 } else {
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-                        result += " ";
+                        tableDataContent.append(" ");
                     }
-                    result += String.valueOf(values.get(column));
+                    tableDataContent.append(values.get(column));
                     for (int j = 0; j <= (maxColumnSize - valuesLength) / 2; j++) {
-                        result += " ";
+                        tableDataContent.append(" ");
                     }
-                    result += VERTICAL_LINE_BORDER_SYMBOL;
+                    tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
                 }
             }
-            result += NEW_LINE;
+            tableDataContent.append(NEW_LINE);
             if (row < rowsCount - 1) {
-                result += "╠";
+                tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT);
                 for (int j = 1; j < columnCount; j++) {
-                    result = composeHorizontalLine(maxColumnSize, result);
-                    result += "╬";
+                    composeHorizontalLine(maxColumnSize, tableDataContent);
+                    tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT);
                 }
-                result = composeHorizontalLine(maxColumnSize, result);
-                result += "╣\n";
+                composeHorizontalLine(maxColumnSize, tableDataContent);
+                tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
             }
         }
-        result += LOWER_LEFT_CORNER_SYMBOL;
+        tableDataContent.append(LOWER_LEFT_CORNER_SYMBOL);
         for (int j = 1; j < columnCount; j++) {
-            result = composeHorizontalLine(maxColumnSize, result);
-            result += LOWER_COLUMN_SEPARATOR_SYMBOL;
+            composeHorizontalLine(maxColumnSize, tableDataContent);
+            tableDataContent.append(LOWER_COLUMN_SEPARATOR_SYMBOL);
         }
-        result = composeHorizontalLine(maxColumnSize, result);
-        result += LOWER_RIGHT_CORNER_SYMBOL + NEW_LINE;
-        return result;
+        composeHorizontalLine(maxColumnSize, tableDataContent);
+        tableDataContent.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        return tableDataContent.toString();
     }
 
     private int incrementMaxColumnSize(int maxColumnSize) {
         return (maxColumnSize % 2 == 0) ? (maxColumnSize + 2) : (maxColumnSize + 3);
     }
 
-    private String composeHorizontalLine(int maxColumnSize, String result) {
+    private void composeHorizontalLine(int maxColumnSize, StringBuilder result) {
         for (int i = 0; i < maxColumnSize; i++) {
-            result += HORIZONTAL_LINE_BORDER_SYMBOL;
+            result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
         }
-        return result;
     }
 
     private int getColumnCount(List<DataSet> dataSets) {
@@ -186,59 +198,59 @@ public class Print implements Command {
 
     private String getHeaderOfTheTable(List<DataSet> dataSets) {
         int maxColumnSize = getMaxColumnSize(dataSets);
-        String result = "";
+        StringBuilder result = new StringBuilder();
         int columnCount = getColumnCount(dataSets);
         maxColumnSize = incrementMaxColumnSize(maxColumnSize);
-        result += UPPER_LEFT_CORNER_SYMBOL;
+        result.append(UPPER_LEFT_CORNER_SYMBOL);
         for (int j = 1; j < columnCount; j++) {
-            result = composeHorizontalLine(maxColumnSize, result);
-            result += COLUMN_SEPARATOR;
+            composeHorizontalLine(maxColumnSize, result);
+            result.append(COLUMN_SEPARATOR);
         }
-        result = composeHorizontalLine(maxColumnSize, result);
-        result += UPPER_RIGHT_CORNER_SYMBOL + NEW_LINE;
+        composeHorizontalLine(maxColumnSize, result);
+        result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
         List<String> columnNames = dataSets.get(0).getColumnNames();
         for (int column = 0; column < columnCount; column++) {
-            result += VERTICAL_LINE_BORDER_SYMBOL;
+            result.append(VERTICAL_LINE_BORDER_SYMBOL);
             int columnNamesLength = columnNames.get(column).length();
             if (isColumnNamesLengthEven(columnNamesLength)) {
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result += " ";
+                    result.append(" ");
                 }
-                result += columnNames.get(column);
+                result.append(columnNames.get(column));
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result += " ";
+                    result.append(" ");
                 }
             } else {
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result += " ";
+                    result.append(" ");
                 }
-                result += columnNames.get(column);
+                result.append(columnNames.get(column));
                 for (int j = 0; j <= (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result += " ";
+                    result.append(" ");
                 }
             }
         }
-        result += "║\n";
+        result.append(VERTICAL_LINE_BORDER_SYMBOL).append(NEW_LINE);
 
         //last string of the header
         if (hasDataSets(dataSets)) {
-            result += "╠";
+            result.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT);
             for (int j = 1; j < columnCount; j++) {
-                result = composeHorizontalLine(maxColumnSize, result);
-                result += "╬";
+                composeHorizontalLine(maxColumnSize, result);
+                result.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT);
             }
-            result = composeHorizontalLine(maxColumnSize, result);
-            result += "╣\n";
+            composeHorizontalLine(maxColumnSize, result);
+            result.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
         } else {
-            result += LOWER_LEFT_CORNER_SYMBOL;
+            result.append(LOWER_LEFT_CORNER_SYMBOL);
             for (int j = 1; j < columnCount; j++) {
-                result = composeHorizontalLine(maxColumnSize, result);
-                result += LOWER_COLUMN_SEPARATOR_SYMBOL;
+                composeHorizontalLine(maxColumnSize, result);
+                result.append(LOWER_COLUMN_SEPARATOR_SYMBOL);
             }
-            result = composeHorizontalLine(maxColumnSize, result);
-            result += LOWER_RIGHT_CORNER_SYMBOL + NEW_LINE;
+            composeHorizontalLine(maxColumnSize, result);
+            result.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
         }
-        return result;
+        return result.toString();
     }
 
     private boolean isColumnNamesLengthEven(int columnNamesLength) {
@@ -246,6 +258,6 @@ public class Print implements Command {
     }
 
     private boolean hasDataSets(List<DataSet> dataSets) {
-        return dataSets.size() > 0;
+        return !dataSets.isEmpty();
     }
 }
