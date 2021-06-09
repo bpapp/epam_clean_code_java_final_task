@@ -72,43 +72,55 @@ public class Print implements Command {
         }
         result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
         result.append(textEmptyTable + NEW_LINE);
+        getEmptyTableFooter(textEmptyTable, result);
+        return result.toString();
+    }
+
+    private void getEmptyTableFooter(String textEmptyTable, StringBuilder result) {
         result.append(LOWER_LEFT_CORNER_SYMBOL);
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
             result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
         }
         result.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
-        return result.toString();
     }
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
         OptionalInt maxLength = OptionalInt.of(0);
         OptionalInt maxLengthForDataValues = OptionalInt.of(0);
         if (hasDataSets(dataSets)) {
-            maxLength = dataSets.get(0).getColumnNames().stream()
-                    .mapToInt(String::length)
-                    .max();
-            maxLengthForDataValues =
-                    dataSets.stream()
-                            .map(DataSet::getValues)
-                            .flatMap(items -> items.stream())
-                            //   .filter(sc -> sc instanceof String)
-                            .map(String::valueOf)
-                            .mapToInt(String::length)
-                            .max();
+            maxLength = getMaxLengthForColumNames(dataSets);
+            maxLengthForDataValues = getMaxLengthForDataValues(dataSets);
         }
+        return countMaximumSize(maxLength, maxLengthForDataValues);
+    }
+
+    private OptionalInt getMaxLengthForColumNames(List<DataSet> dataSets) {
+        OptionalInt maxLength;
+        maxLength = dataSets.get(0).getColumnNames().stream()
+                .mapToInt(String::length)
+                .max();
+        return maxLength;
+    }
+
+    private OptionalInt getMaxLengthForDataValues(List<DataSet> dataSets) {
+        return dataSets.stream()
+                .map(DataSet::getValues)
+                .flatMap(items -> items.stream())
+                //   .filter(sc -> sc instanceof String)
+                .map(String::valueOf)
+                .mapToInt(String::length)
+                .max();
+    }
+
+    private int countMaximumSize(OptionalInt maxLength, OptionalInt maxLengthForDataValues) {
         return Math.max(maxLength.orElse(0), maxLengthForDataValues.orElse(0));
     }
 
     private String getStringTableData(List<DataSet> dataSets) {
-        int rowsCount;
-        rowsCount = dataSets.size();
+        int rowsCount = dataSets.size();
         int maxColumnSize = getMaxColumnSize(dataSets);
         String result = "";
-        if (maxColumnSize % 2 == 0) {
-            maxColumnSize += 2;
-        } else {
-            maxColumnSize += 3;
-        }
+        maxColumnSize = incrementMaxColumnSize(maxColumnSize);
         int columnCount = getColumnCount(dataSets);
         for (int row = 0; row < rowsCount; row++) {
             List<Object> values = dataSets.get(row).getValues();
@@ -156,6 +168,10 @@ public class Print implements Command {
         return result;
     }
 
+    private int incrementMaxColumnSize(int maxColumnSize) {
+        return (maxColumnSize % 2 == 0) ? (maxColumnSize + 2) : (maxColumnSize + 3);
+    }
+
     private String composeHorizontalLine(int maxColumnSize, String result) {
         for (int i = 0; i < maxColumnSize; i++) {
             result += HORIZONTAL_LINE_BORDER_SYMBOL;
@@ -172,11 +188,7 @@ public class Print implements Command {
         int maxColumnSize = getMaxColumnSize(dataSets);
         String result = "";
         int columnCount = getColumnCount(dataSets);
-        if (maxColumnSize % 2 == 0) {
-            maxColumnSize += 2;
-        } else {
-            maxColumnSize += 3;
-        }
+        maxColumnSize = incrementMaxColumnSize(maxColumnSize);
         result += UPPER_LEFT_CORNER_SYMBOL;
         for (int j = 1; j < columnCount; j++) {
             result = composeHorizontalLine(maxColumnSize, result);
