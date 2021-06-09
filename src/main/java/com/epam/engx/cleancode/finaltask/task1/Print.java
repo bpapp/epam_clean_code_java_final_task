@@ -24,6 +24,7 @@ public class Print implements Command {
     private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT = "╠";
     private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT = "╬";
     private static final int TABLE_NAME_INDEX = 1;
+    private static final String SPACE = " ";
 
     private View view;
     private DatabaseManager manager;
@@ -49,7 +50,7 @@ public class Print implements Command {
     }
 
     private String[] splitInputBySpace(String input) {
-        return input.split(" ");
+        return input.split(SPACE);
     }
 
     private void validateCommandLength(String[] command) {
@@ -61,7 +62,7 @@ public class Print implements Command {
     private String getTableString(List<DataSet> data) {
         return hasNoColumnSize(getMaxColumnSize(data)) ?
                 getEmptyTable(tableName) :
-                getHeaderOfTheTable(data) + getStringTableData(data);
+                getHeaderOfTheTable(data) + getBodyAndFooterOfTheTable(data);
     }
 
     private boolean hasNoColumnSize(int maxColumnSize) {
@@ -71,30 +72,36 @@ public class Print implements Command {
     private String getEmptyTable(String tableName) {
         String textEmptyTable = "║ Table '" + tableName + "' is empty or does not exist ║";
         StringBuilder result = new StringBuilder();
+        composeEmptyTable(textEmptyTable, result);
+        return result.toString();
+    }
+
+    private void composeEmptyTable(String textEmptyTable, StringBuilder result) {
         getEmptyTableHeader(textEmptyTable, result);
         getEmptyTableBody(textEmptyTable, result);
         getEmptyTableFooter(textEmptyTable, result);
-        return result.toString();
     }
 
     private void getEmptyTableHeader(String textEmptyTable, StringBuilder result) {
         result.append(UPPER_LEFT_CORNER_SYMBOL);
-        for (int i = 0; i < textEmptyTable.length() - 2; i++) {
-            result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
-        }
+        drawHorizontalLine(textEmptyTable, result);
         result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
     }
 
     private void getEmptyTableBody(String textEmptyTable, StringBuilder result) {
-        result.append(textEmptyTable + NEW_LINE);
+        result.append(textEmptyTable).append(NEW_LINE);
     }
 
     private void getEmptyTableFooter(String textEmptyTable, StringBuilder result) {
         result.append(LOWER_LEFT_CORNER_SYMBOL);
+        drawHorizontalLine(textEmptyTable, result);
+        result.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+    }
+
+    private void drawHorizontalLine(String textEmptyTable, StringBuilder result) {
         for (int i = 0; i < textEmptyTable.length() - 2; i++) {
             result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
         }
-        result.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
     }
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
@@ -104,7 +111,7 @@ public class Print implements Command {
             maxLength = getMaxLengthForColumNames(dataSets);
             maxLengthForDataValues = getMaxLengthForDataValues(dataSets);
         }
-        return countMaximumSize(maxLength, maxLengthForDataValues);
+        return calculateMaximumSize(maxLength, maxLengthForDataValues);
     }
 
     private OptionalInt getMaxLengthForColumNames(List<DataSet> dataSets) {
@@ -125,11 +132,11 @@ public class Print implements Command {
                 .max();
     }
 
-    private int countMaximumSize(OptionalInt maxLength, OptionalInt maxLengthForDataValues) {
+    private int calculateMaximumSize(OptionalInt maxLength, OptionalInt maxLengthForDataValues) {
         return Math.max(maxLength.orElse(0), maxLengthForDataValues.orElse(0));
     }
 
-    private String getStringTableData(List<DataSet> dataSets) {
+    private String getBodyAndFooterOfTheTable(List<DataSet> dataSets) {
         int rowsCount = dataSets.size();
         int maxColumnSize = getMaxColumnSize(dataSets);
         StringBuilder tableDataContent = new StringBuilder();
@@ -142,20 +149,20 @@ public class Print implements Command {
                 int valuesLength = String.valueOf(values.get(column)).length();
                 if (valuesLength % 2 == 0) {
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-                        tableDataContent.append(" ");
+                        tableDataContent.append(SPACE);
                     }
                     tableDataContent.append(values.get(column));
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-                        tableDataContent.append(" ");
+                        tableDataContent.append(SPACE);
                     }
                     tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
                 } else {
                     for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-                        tableDataContent.append(" ");
+                        tableDataContent.append(SPACE);
                     }
                     tableDataContent.append(values.get(column));
                     for (int j = 0; j <= (maxColumnSize - valuesLength) / 2; j++) {
-                        tableDataContent.append(" ");
+                        tableDataContent.append(SPACE);
                     }
                     tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
                 }
@@ -208,25 +215,26 @@ public class Print implements Command {
         }
         composeHorizontalLine(maxColumnSize, result);
         result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        System.out.println("fantasztikus" + result.toString());
         List<String> columnNames = dataSets.get(0).getColumnNames();
         for (int column = 0; column < columnCount; column++) {
             result.append(VERTICAL_LINE_BORDER_SYMBOL);
             int columnNamesLength = columnNames.get(column).length();
             if (isColumnNamesLengthEven(columnNamesLength)) {
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result.append(" ");
+                    result.append(SPACE);
                 }
                 result.append(columnNames.get(column));
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result.append(" ");
+                    result.append(SPACE);
                 }
             } else {
                 for (int j = 0; j < (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result.append(" ");
+                    result.append(SPACE);
                 }
                 result.append(columnNames.get(column));
                 for (int j = 0; j <= (maxColumnSize - columnNamesLength) / 2; j++) {
-                    result.append(" ");
+                    result.append(SPACE);
                 }
             }
         }
