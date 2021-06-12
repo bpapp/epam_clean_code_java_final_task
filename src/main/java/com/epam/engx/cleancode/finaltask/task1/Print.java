@@ -46,7 +46,7 @@ public class Print implements Command {
             this.rightBoundary = rightBoundary;
         }
     }
-    
+
     public Print(View view, DatabaseManager manager) {
         this.view = view;
         this.manager = manager;
@@ -191,7 +191,7 @@ public class Print implements Command {
                 } else {
                     appendSpaceToTableContent(maxColumnSize, tableDataContent, valuesLength);
                     tableDataContent.append(values.get(column));
-                    appendOneMoreSpaceToTableContent(maxColumnSize, tableDataContent, valuesLength);
+                    tableDataContent.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
                     tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
                 }
             }
@@ -222,10 +222,8 @@ public class Print implements Command {
         tableDataContent.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
     }
 
-    private void appendOneMoreSpaceToTableContent(int maxColumnSize, StringBuilder tableDataContent, int valuesLength) {
-        for (int j = 0; j <= (maxColumnSize - valuesLength) / 2; j++) {
-            tableDataContent.append(SPACE);
-        }
+    private String appendOneMoreSpaceToTableContent(int maxColumnSize, int valuesLength) {
+        return duplicateSymbol(SPACE, ((maxColumnSize - valuesLength) / 2) + 1);
     }
 
     private void appendSpaceToTableContent(int maxColumnSize, StringBuilder tableDataContent, int valuesLength) {
@@ -263,7 +261,7 @@ public class Print implements Command {
             if (isColumnNamesLengthEven(columnNamesLength)) {
                 appendSpaceToTableContent(maxColumnSize, result, columnNamesLength);
             } else {
-                appendOneMoreSpaceToTableContent(maxColumnSize, result, columnNamesLength);
+                result.append(appendOneMoreSpaceToTableContent(maxColumnSize, columnNamesLength));
             }
         }
         result.append(VERTICAL_LINE_BORDER_SYMBOL).append(NEW_LINE);
