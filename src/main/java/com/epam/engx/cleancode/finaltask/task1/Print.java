@@ -205,20 +205,20 @@ public class Print implements Command {
     private void drawCellLowerPart(int maxColumnSize, StringBuilder tableDataContent, int columnCount) {
         tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT);
         for (int j = 1; j < columnCount; j++) {
-            composeHorizontalLine(maxColumnSize, tableDataContent);
+            tableDataContent.append(composeHorizontalLine(maxColumnSize));
             tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT);
         }
-        composeHorizontalLine(maxColumnSize, tableDataContent);
+        tableDataContent.append(composeHorizontalLine(maxColumnSize));
         tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
     }
 
     private void buildTableFooter(int maxColumnSize, StringBuilder tableDataContent, int columnCount) {
         tableDataContent.append(LOWER_LEFT_CORNER_SYMBOL);
         for (int j = 1; j < columnCount; j++) {
-            composeHorizontalLine(maxColumnSize, tableDataContent);
+            tableDataContent.append(composeHorizontalLine(maxColumnSize));
             tableDataContent.append(LOWER_COLUMN_SEPARATOR_SYMBOL);
         }
-        composeHorizontalLine(maxColumnSize, tableDataContent);
+        tableDataContent.append(composeHorizontalLine(maxColumnSize));
         tableDataContent.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
     }
 
@@ -236,10 +236,9 @@ public class Print implements Command {
         return (maxColumnSize % 2 == 0) ? (maxColumnSize + 2) : (maxColumnSize + 3);
     }
 
-    private void composeHorizontalLine(int maxColumnSize, StringBuilder result) {
-        for (int i = 0; i < maxColumnSize; i++) {
-            result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
-        }
+    // ez jon
+    private String composeHorizontalLine(int maxColumnSize) {
+        return duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, maxColumnSize);
     }
 
     private int getColumnCount(List<DataSet> dataSets) {
@@ -251,7 +250,7 @@ public class Print implements Command {
         StringBuilder result = new StringBuilder();
         int columnCount = getColumnCount(dataSets);
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
-        drawUpperPartOfHeader(result, columnCount, maxColumnSize);
+        result.append(drawUpperPartOfHeader(columnCount, maxColumnSize));
         List<String> columnNames = dataSets.get(0).getColumnNames();
         for (int column = 0; column < columnCount; column++) {
             result.append(VERTICAL_LINE_BORDER_SYMBOL);
@@ -275,14 +274,16 @@ public class Print implements Command {
         return result.toString();
     }
 
-    private void drawUpperPartOfHeader(StringBuilder result, int columnCount, int maxColumnSize) {
-        result.append(UPPER_LEFT_CORNER_SYMBOL);
+    private String drawUpperPartOfHeader(int columnCount, int maxColumnSize) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(UPPER_LEFT_CORNER_SYMBOL);
         for (int j = 1; j < columnCount; j++) {
-            composeHorizontalLine(maxColumnSize, result);
-            result.append(COLUMN_SEPARATOR);
+            builder.append(composeHorizontalLine(maxColumnSize));
+            builder.append(COLUMN_SEPARATOR);
         }
-        composeHorizontalLine(maxColumnSize, result);
-        result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        builder.append(composeHorizontalLine(maxColumnSize));
+        builder.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        return builder.toString();
     }
 
     private boolean isColumnNamesLengthEven(int columnNamesLength) {
