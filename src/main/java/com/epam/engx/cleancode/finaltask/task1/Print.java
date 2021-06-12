@@ -31,6 +31,22 @@ public class Print implements Command {
     private final View view;
     private final DatabaseManager manager;
 
+    private enum LevelBoundary {
+        UPPER("╔", "╦", "╗"),
+        MIDDLE("╠", "╬", "╣"),
+        BOTTOM("╚", "╩", "╝");
+
+        private final String leftBoundary;
+        private final String middleBoundary;
+        private final String rightBoundary;
+
+        LevelBoundary(String leftBoundary, String middleBoundary, String rightBoundary) {
+            this.leftBoundary = leftBoundary;
+            this.middleBoundary = middleBoundary;
+            this.rightBoundary = rightBoundary;
+        }
+    }
+    
     public Print(View view, DatabaseManager manager) {
         this.view = view;
         this.manager = manager;
@@ -85,7 +101,7 @@ public class Print implements Command {
 
     private void getEmptyTableHeader(String textEmptyTable, StringBuilder result) {
         result.append(UPPER_LEFT_CORNER_SYMBOL);
-        drawHorizontalLine(textEmptyTable, result);
+        result.append(drawHorizontalLine(textEmptyTable));
         result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
     }
 
@@ -95,15 +111,27 @@ public class Print implements Command {
 
     private void getEmptyTableFooter(String textEmptyTable, StringBuilder result) {
         result.append(LOWER_LEFT_CORNER_SYMBOL);
-        drawHorizontalLine(textEmptyTable, result);
+        result.append(drawHorizontalLine(textEmptyTable));
         result.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
     }
 
-    private void drawHorizontalLine(String textEmptyTable, StringBuilder result) {
-        for (int i = 0; i < textEmptyTable.length() - 2; i++) {
-            result.append(HORIZONTAL_LINE_BORDER_SYMBOL);
-        }
+    private String drawHorizontalLine(String textEmptyTable) {
+        return duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, textEmptyTable.length() - 2);
     }
+
+    private String duplicateSymbol(String symbol, int times) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < times; i++) {
+            builder.append(symbol);
+        }
+        return builder.toString();
+    }
+
+//    private String buildHorizontalBoundaryLine(LevelBoundary levelBoundary other parameters) {
+//        LevelBoundary.BOTTOM.rightBoundary;
+//
+//    }
+
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
         OptionalInt maxLength = OptionalInt.of(0);
