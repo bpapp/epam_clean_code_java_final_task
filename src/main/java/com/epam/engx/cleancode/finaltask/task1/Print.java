@@ -89,30 +89,36 @@ public class Print implements Command {
     private String getEmptyTable(String tableName) {
         String textEmptyTable = String.format("║ Table '%s' is empty or does not exist ║", tableName);
         StringBuilder result = new StringBuilder();
-        composeEmptyTable(textEmptyTable, result);
+        result.append(composeEmptyTable(textEmptyTable));
         return result.toString();
     }
 
-    private void composeEmptyTable(String textEmptyTable, StringBuilder result) {
-        getEmptyTableHeader(textEmptyTable, result);
-        getEmptyTableBody(textEmptyTable, result);
-        getEmptyTableFooter(textEmptyTable, result);
+    private String composeEmptyTable(String textEmptyTable) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getEmptyTableHeader(textEmptyTable));
+        builder.append(getEmptyTableBody(textEmptyTable));
+        builder.append(getEmptyTableFooter(textEmptyTable));
+        return builder.toString();
     }
 
-    private void getEmptyTableHeader(String textEmptyTable, StringBuilder result) {
-        result.append(UPPER_LEFT_CORNER_SYMBOL);
-        result.append(drawHorizontalLine(textEmptyTable));
-        result.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+    private String getEmptyTableHeader(String textEmptyTable) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(UPPER_LEFT_CORNER_SYMBOL);
+        builder.append(drawHorizontalLine(textEmptyTable));
+        builder.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        return builder.toString();
     }
 
-    private void getEmptyTableBody(String textEmptyTable, StringBuilder result) {
-        result.append(textEmptyTable).append(NEW_LINE);
+    private String getEmptyTableBody(String textEmptyTable) {
+        return textEmptyTable.concat(NEW_LINE);
     }
 
-    private void getEmptyTableFooter(String textEmptyTable, StringBuilder result) {
-        result.append(LOWER_LEFT_CORNER_SYMBOL);
-        result.append(drawHorizontalLine(textEmptyTable));
-        result.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+    private String getEmptyTableFooter(String textEmptyTable) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(LOWER_LEFT_CORNER_SYMBOL);
+        builder.append(drawHorizontalLine(textEmptyTable));
+        builder.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        return builder.toString();
     }
 
     private String drawHorizontalLine(String textEmptyTable) {
@@ -236,7 +242,6 @@ public class Print implements Command {
         return (maxColumnSize % 2 == 0) ? (maxColumnSize + 2) : (maxColumnSize + 3);
     }
 
-    // ez jon
     private String composeHorizontalLine(int maxColumnSize) {
         return duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, maxColumnSize);
     }
