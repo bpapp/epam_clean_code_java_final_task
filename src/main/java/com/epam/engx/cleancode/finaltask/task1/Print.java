@@ -25,10 +25,11 @@ public class Print implements Command {
     private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT = "╬";
     private static final int TABLE_NAME_INDEX = 1;
     private static final String SPACE = " ";
+    private static final String PRINT_COMMAND = "print ";
+    private static final int CORRECT_NUMBER_OF_PARAMETERS = 2;
 
-    private View view;
-    private DatabaseManager manager;
-    private String tableName;
+    private final View view;
+    private final DatabaseManager manager;
 
     public Print(View view, DatabaseManager manager) {
         this.view = view;
@@ -37,29 +38,29 @@ public class Print implements Command {
 
     @Override
     public boolean canProcess(String command) {
-        return command.startsWith("print ");
+        return command.startsWith(PRINT_COMMAND);
     }
 
     @Override
     public void process(String input) {
-        String[] command = splitInputBySpace(input);
-        validateCommandLength(command);
-        tableName = command[TABLE_NAME_INDEX];
+        String[] commands = splitInputBySpace(input);
+        validateCommandLength(commands.length);
+        String tableName = commands[TABLE_NAME_INDEX];
         List<DataSet> data = manager.getTableData(tableName);
-        view.write(getTableString(data));
+        view.write(getTableString(data, tableName));
     }
 
     private String[] splitInputBySpace(String input) {
         return input.split(SPACE);
     }
 
-    private void validateCommandLength(String[] command) {
-        if (command.length != 2) {
-            throw new IllegalArgumentException("incorrect number of parameters. Expected 1, but is " + (command.length - 1));
+    private void validateCommandLength(int length) {
+        if (length != CORRECT_NUMBER_OF_PARAMETERS) {
+            throw new IllegalArgumentException("incorrect number of parameters. Expected 1, but is " + (length - 1));
         }
     }
 
-    private String getTableString(List<DataSet> data) {
+    private String getTableString(List<DataSet> data, String tableName) {
         return hasNoColumnSize(getMaxColumnSize(data)) ?
                 getEmptyTable(tableName) :
                 getHeaderOfTheTable(data) + getBodyAndFooterOfTheTable(data);
@@ -70,7 +71,7 @@ public class Print implements Command {
     }
 
     private String getEmptyTable(String tableName) {
-        String textEmptyTable = "║ Table '" + tableName + "' is empty or does not exist ║";
+        String textEmptyTable = String.format("║ Table '%s' is empty or does not exist ║", tableName);
         StringBuilder result = new StringBuilder();
         composeEmptyTable(textEmptyTable, result);
         return result.toString();
@@ -137,16 +138,18 @@ public class Print implements Command {
     }
 
     private String getBodyAndFooterOfTheTable(List<DataSet> dataSets) {
-        int rowsCount = dataSets.size();
         StringBuilder tableDataContent = new StringBuilder();
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
         int columnCount = getColumnCount(dataSets);
-        buildTableBody(dataSets, rowsCount, maxColumnSize, tableDataContent, columnCount);
+        buildTableBody(dataSets, tableDataContent);
         buildTableFooter(maxColumnSize, tableDataContent, columnCount);
         return tableDataContent.toString();
     }
 
-    private void buildTableBody(List<DataSet> dataSets, int rowsCount, int maxColumnSize, StringBuilder tableDataContent, int columnCount) {
+    private void buildTableBody(List<DataSet> dataSets, StringBuilder tableDataContent) {
+        int rowsCount = dataSets.size();
+        int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
+        int columnCount = getColumnCount(dataSets);
         for (int row = 0; row < rowsCount; row++) {
             List<Object> values = dataSets.get(row).getValues();
             tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
