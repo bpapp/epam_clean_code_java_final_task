@@ -11,11 +11,7 @@ import java.util.OptionalInt;
 
 public class Print implements Command {
 
-    private static final String UPPER_LEFT_CORNER_SYMBOL = "╔";
-    private static final String UPPER_RIGHT_CORNER_SYMBOL = "╗";
     private static final String NEW_LINE = "\n";
-    private static final String LOWER_LEFT_CORNER_SYMBOL = "╚";
-    private static final String LOWER_RIGHT_CORNER_SYMBOL = "╝";
     private static final String HORIZONTAL_LINE_BORDER_SYMBOL = "═";
     private static final String VERTICAL_LINE_BORDER_SYMBOL = "║";
     private static final int TABLE_NAME_INDEX = 1;
@@ -111,14 +107,10 @@ public class Print implements Command {
 
     private String getEmptyTableFooter(String textEmptyTable) {
         StringBuilder builder = new StringBuilder();
-        builder.append(LOWER_LEFT_CORNER_SYMBOL);
-        builder.append(drawHorizontalLine(textEmptyTable));
-        builder.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        builder.append(
+                buildHorizontalBoundaryLine(LevelBoundary.BOTTOM, 1, textEmptyTable.length() - 2))
+                .append(NEW_LINE);
         return builder.toString();
-    }
-
-    private String drawHorizontalLine(String textEmptyTable) {
-        return duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, textEmptyTable.length() - 2);
     }
 
     private String duplicateSymbol(String symbol, int times) {
@@ -140,7 +132,6 @@ public class Print implements Command {
         builder.append(levelBoundary.rightBoundary);
         return builder.toString();
     }
-
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
         OptionalInt maxLength = OptionalInt.of(0);
@@ -193,24 +184,25 @@ public class Print implements Command {
             tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
             for (int column = 0; column < columnCount; column++) {
                 int valuesLength = String.valueOf(values.get(column)).length();
+                tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
+                tableBody.append(values.get(column));
                 if (valuesLength % 2 == 0) {
                     tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableBody.append(values.get(column));
-                    tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
                 } else {
-                    tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableBody.append(values.get(column));
                     tableBody.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
                 }
+                tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
             }
             tableBody.append(NEW_LINE);
-            if (row < rowsCount - 1) {
+            if (hasMoreRow(rowsCount, row)) {
                 tableBody.append(drawCellLowerPart(maxColumnSize, columnCount));
             }
         }
         return tableBody.toString();
+    }
+
+    private boolean hasMoreRow(int rowsCount, int row) {
+        return row < rowsCount - 1;
     }
 
     private String drawCellLowerPart(int maxColumnSize, int columnCount) {
