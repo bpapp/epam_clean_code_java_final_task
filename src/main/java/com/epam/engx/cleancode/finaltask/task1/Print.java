@@ -176,29 +176,41 @@ public class Print implements Command {
 
     private String buildTableBody(List<DataSet> dataSets) {
         StringBuilder tableBody = new StringBuilder();
-        int rowsCount = dataSets.size();
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
+        tableBody.append(composeAllRows(dataSets, maxColumnSize));
+        return tableBody.toString();
+    }
+
+    private String composeAllRows(List<DataSet> dataSets, int maxColumnSize) {
+        StringBuilder builder = new StringBuilder();
         int columnCount = getColumnCount(dataSets);
+        int rowsCount = dataSets.size();
         for (int row = 0; row < rowsCount; row++) {
             List<Object> values = dataSets.get(row).getValues();
-            tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
-            for (int column = 0; column < columnCount; column++) {
-                int valuesLength = String.valueOf(values.get(column)).length();
-                tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                tableBody.append(values.get(column));
-                if (valuesLength % 2 == 0) {
-                    tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                } else {
-                    tableBody.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
-                }
-                tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
-            }
-            tableBody.append(NEW_LINE);
+            builder.append(VERTICAL_LINE_BORDER_SYMBOL);
+            builder.append(buildColumns(maxColumnSize, columnCount, values));
+            builder.append(NEW_LINE);
             if (hasMoreRow(rowsCount, row)) {
-                tableBody.append(drawCellLowerPart(maxColumnSize, columnCount));
+                builder.append(drawCellLowerPart(maxColumnSize, columnCount));
             }
         }
-        return tableBody.toString();
+        return builder.toString();
+    }
+
+    private String buildColumns(int maxColumnSize, int columnCount, List<Object> values) {
+        StringBuilder builder = new StringBuilder();
+        for (int column = 0; column < columnCount; column++) {
+            int valuesLength = String.valueOf(values.get(column)).length();
+            builder.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
+            builder.append(values.get(column));
+            if (valuesLength % 2 == 0) {
+                builder.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
+            } else {
+                builder.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
+            }
+            builder.append(VERTICAL_LINE_BORDER_SYMBOL);
+        }
+        return builder.toString();
     }
 
     private boolean hasMoreRow(int rowsCount, int row) {
