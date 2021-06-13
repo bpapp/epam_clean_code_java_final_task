@@ -134,10 +134,17 @@ public class Print implements Command {
         return builder.toString();
     }
 
-//    private String buildHorizontalBoundaryLine(LevelBoundary levelBoundary other parameters) {
-//        LevelBoundary.BOTTOM.rightBoundary;
-//
-//    }
+    private String buildHorizontalBoundaryLine(LevelBoundary levelBoundary, int columnCount, int maxColumnSize) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(levelBoundary.leftBoundary);
+        for (int j = 1; j < columnCount; j++) {
+            builder.append(composeHorizontalLine(maxColumnSize));
+            builder.append(levelBoundary.middleBoundary);
+        }
+        builder.append(composeHorizontalLine(maxColumnSize));
+        builder.append(levelBoundary.rightBoundary);
+        return builder.toString();
+    }
 
 
     private int getMaxColumnSize(List<DataSet> dataSets) {
@@ -176,58 +183,58 @@ public class Print implements Command {
         StringBuilder tableDataContent = new StringBuilder();
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
         int columnCount = getColumnCount(dataSets);
-        buildTableBody(dataSets, tableDataContent);
+        tableDataContent.append(buildTableBody(dataSets));
         tableDataContent.append(buildTableFooter(maxColumnSize, columnCount));
         return tableDataContent.toString();
     }
 
-    private void buildTableBody(List<DataSet> dataSets, StringBuilder tableDataContent) {
+    private String buildTableBody(List<DataSet> dataSets) {
+        StringBuilder tableBody = new StringBuilder();
         int rowsCount = dataSets.size();
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
         int columnCount = getColumnCount(dataSets);
         for (int row = 0; row < rowsCount; row++) {
             List<Object> values = dataSets.get(row).getValues();
-            tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
+            tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
             for (int column = 0; column < columnCount; column++) {
                 int valuesLength = String.valueOf(values.get(column)).length();
                 if (valuesLength % 2 == 0) {
-                    tableDataContent.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableDataContent.append(values.get(column));
-                    tableDataContent.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
+                    tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
+                    tableBody.append(values.get(column));
+                    tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
+                    tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
                 } else {
-                    tableDataContent.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableDataContent.append(values.get(column));
-                    tableDataContent.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
-                    tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
+                    tableBody.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
+                    tableBody.append(values.get(column));
+                    tableBody.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
+                    tableBody.append(VERTICAL_LINE_BORDER_SYMBOL);
                 }
             }
-            tableDataContent.append(NEW_LINE);
+            tableBody.append(NEW_LINE);
             if (row < rowsCount - 1) {
-                drawCellLowerPart(maxColumnSize, tableDataContent, columnCount);
+                tableBody.append(drawCellLowerPart(maxColumnSize, columnCount));
             }
         }
+        return tableBody.toString();
     }
 
-    private void drawCellLowerPart(int maxColumnSize, StringBuilder tableDataContent, int columnCount) {
-        tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT);
+    private String drawCellLowerPart(int maxColumnSize, int columnCount) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT);
         for (int j = 1; j < columnCount; j++) {
-            tableDataContent.append(composeHorizontalLine(maxColumnSize));
-            tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT);
+            builder.append(composeHorizontalLine(maxColumnSize));
+            builder.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT);
         }
-        tableDataContent.append(composeHorizontalLine(maxColumnSize));
-        tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
+        builder.append(composeHorizontalLine(maxColumnSize));
+        builder.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
+        return builder.toString();
     }
 
     private String buildTableFooter(int maxColumnSize, int columnCount) {
         StringBuilder builder = new StringBuilder();
-        builder.append(LOWER_LEFT_CORNER_SYMBOL);
-        for (int j = 1; j < columnCount; j++) {
-            builder.append(composeHorizontalLine(maxColumnSize));
-            builder.append(LOWER_COLUMN_SEPARATOR_SYMBOL);
-        }
-        builder.append(composeHorizontalLine(maxColumnSize));
-        builder.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        builder.append(
+                buildHorizontalBoundaryLine(LevelBoundary.BOTTOM, columnCount, maxColumnSize))
+                .append(NEW_LINE);
         return builder.toString();
     }
 
@@ -273,22 +280,18 @@ public class Print implements Command {
 
         //last string of the header
         if (hasDataSets(dataSets)) {
-            drawCellLowerPart(maxColumnSize, result, columnCount);
+            result.append(drawCellLowerPart(maxColumnSize, columnCount));
         } else {
             result.append(buildTableFooter(maxColumnSize, columnCount));
         }
         return result.toString();
     }
-    
+
     private String drawUpperPartOfHeader(int columnCount, int maxColumnSize) {
         StringBuilder builder = new StringBuilder();
-        builder.append(UPPER_LEFT_CORNER_SYMBOL);
-        for (int j = 1; j < columnCount; j++) {
-            builder.append(composeHorizontalLine(maxColumnSize));
-            builder.append(COLUMN_SEPARATOR);
-        }
-        builder.append(composeHorizontalLine(maxColumnSize));
-        builder.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        builder.append(
+                buildHorizontalBoundaryLine(LevelBoundary.UPPER, columnCount, maxColumnSize))
+                .append(NEW_LINE);
         return builder.toString();
     }
 
