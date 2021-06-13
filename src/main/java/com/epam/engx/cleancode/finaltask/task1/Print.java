@@ -27,6 +27,7 @@ public class Print implements Command {
     private static final String SPACE = " ";
     private static final String PRINT_COMMAND = "print ";
     private static final int CORRECT_NUMBER_OF_PARAMETERS = 2;
+    private static final int ONE_MORE_SPACE_VALUE = 1;
 
     private final View view;
     private final DatabaseManager manager;
@@ -176,7 +177,7 @@ public class Print implements Command {
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
         int columnCount = getColumnCount(dataSets);
         buildTableBody(dataSets, tableDataContent);
-        buildTableFooter(maxColumnSize, tableDataContent, columnCount);
+        tableDataContent.append(buildTableFooter(maxColumnSize, columnCount));
         return tableDataContent.toString();
     }
 
@@ -190,12 +191,12 @@ public class Print implements Command {
             for (int column = 0; column < columnCount; column++) {
                 int valuesLength = String.valueOf(values.get(column)).length();
                 if (valuesLength % 2 == 0) {
-                    appendSpaceToTableContent(maxColumnSize, tableDataContent, valuesLength);
+                    tableDataContent.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
                     tableDataContent.append(values.get(column));
-                    appendSpaceToTableContent(maxColumnSize, tableDataContent, valuesLength);
+                    tableDataContent.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
                     tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
                 } else {
-                    appendSpaceToTableContent(maxColumnSize, tableDataContent, valuesLength);
+                    tableDataContent.append(appendSpaceToTableContent(maxColumnSize, valuesLength));
                     tableDataContent.append(values.get(column));
                     tableDataContent.append(appendOneMoreSpaceToTableContent(maxColumnSize, valuesLength));
                     tableDataContent.append(VERTICAL_LINE_BORDER_SYMBOL);
@@ -218,24 +219,24 @@ public class Print implements Command {
         tableDataContent.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
     }
 
-    private void buildTableFooter(int maxColumnSize, StringBuilder tableDataContent, int columnCount) {
-        tableDataContent.append(LOWER_LEFT_CORNER_SYMBOL);
+    private String buildTableFooter(int maxColumnSize, int columnCount) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(LOWER_LEFT_CORNER_SYMBOL);
         for (int j = 1; j < columnCount; j++) {
-            tableDataContent.append(composeHorizontalLine(maxColumnSize));
-            tableDataContent.append(LOWER_COLUMN_SEPARATOR_SYMBOL);
+            builder.append(composeHorizontalLine(maxColumnSize));
+            builder.append(LOWER_COLUMN_SEPARATOR_SYMBOL);
         }
-        tableDataContent.append(composeHorizontalLine(maxColumnSize));
-        tableDataContent.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        builder.append(composeHorizontalLine(maxColumnSize));
+        builder.append(LOWER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        return builder.toString();
     }
 
     private String appendOneMoreSpaceToTableContent(int maxColumnSize, int valuesLength) {
-        return duplicateSymbol(SPACE, ((maxColumnSize - valuesLength) / 2) + 1);
+        return duplicateSymbol(SPACE, ((maxColumnSize - valuesLength) / 2) + ONE_MORE_SPACE_VALUE);
     }
 
-    private void appendSpaceToTableContent(int maxColumnSize, StringBuilder tableDataContent, int valuesLength) {
-        for (int j = 0; j < (maxColumnSize - valuesLength) / 2; j++) {
-            tableDataContent.append(SPACE);
-        }
+    private String appendSpaceToTableContent(int maxColumnSize, int valuesLength) {
+        return duplicateSymbol(SPACE, ((maxColumnSize - valuesLength) / 2));
     }
 
     private int incrementMaxColumnSize(int maxColumnSize) {
@@ -260,10 +261,10 @@ public class Print implements Command {
         for (int column = 0; column < columnCount; column++) {
             result.append(VERTICAL_LINE_BORDER_SYMBOL);
             int columnNamesLength = columnNames.get(column).length();
-            appendSpaceToTableContent(maxColumnSize, result, columnNamesLength);
+            result.append(appendSpaceToTableContent(maxColumnSize, columnNamesLength));
             result.append(columnNames.get(column));
             if (isColumnNamesLengthEven(columnNamesLength)) {
-                appendSpaceToTableContent(maxColumnSize, result, columnNamesLength);
+                result.append(appendSpaceToTableContent(maxColumnSize, columnNamesLength));
             } else {
                 result.append(appendOneMoreSpaceToTableContent(maxColumnSize, columnNamesLength));
             }
@@ -274,11 +275,11 @@ public class Print implements Command {
         if (hasDataSets(dataSets)) {
             drawCellLowerPart(maxColumnSize, result, columnCount);
         } else {
-            buildTableFooter(maxColumnSize, result, columnCount);
+            result.append(buildTableFooter(maxColumnSize, columnCount));
         }
         return result.toString();
     }
-
+    
     private String drawUpperPartOfHeader(int columnCount, int maxColumnSize) {
         StringBuilder builder = new StringBuilder();
         builder.append(UPPER_LEFT_CORNER_SYMBOL);
