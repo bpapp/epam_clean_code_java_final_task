@@ -16,13 +16,8 @@ public class Print implements Command {
     private static final String NEW_LINE = "\n";
     private static final String LOWER_LEFT_CORNER_SYMBOL = "╚";
     private static final String LOWER_RIGHT_CORNER_SYMBOL = "╝";
-    private static final String LOWER_COLUMN_SEPARATOR_SYMBOL = "╩";
     private static final String HORIZONTAL_LINE_BORDER_SYMBOL = "═";
     private static final String VERTICAL_LINE_BORDER_SYMBOL = "║";
-    private static final String COLUMN_SEPARATOR = "╦";
-    private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT = "╣";
-    private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT = "╠";
-    private static final String BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT = "╬";
     private static final int TABLE_NAME_INDEX = 1;
     private static final String SPACE = " ";
     private static final String PRINT_COMMAND = "print ";
@@ -104,9 +99,9 @@ public class Print implements Command {
 
     private String getEmptyTableHeader(String textEmptyTable) {
         StringBuilder builder = new StringBuilder();
-        builder.append(UPPER_LEFT_CORNER_SYMBOL);
-        builder.append(drawHorizontalLine(textEmptyTable));
-        builder.append(UPPER_RIGHT_CORNER_SYMBOL).append(NEW_LINE);
+        builder.append(
+                buildHorizontalBoundaryLine(LevelBoundary.UPPER, 1, textEmptyTable.length() - 2))
+                .append(NEW_LINE);
         return builder.toString();
     }
 
@@ -220,13 +215,9 @@ public class Print implements Command {
 
     private String drawCellLowerPart(int maxColumnSize, int columnCount) {
         StringBuilder builder = new StringBuilder();
-        builder.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_RIGHT_LINE_SEGMENT);
-        for (int j = 1; j < columnCount; j++) {
-            builder.append(composeHorizontalLine(maxColumnSize));
-            builder.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_HORIZONTAL_LINE_SEGMENT);
-        }
-        builder.append(composeHorizontalLine(maxColumnSize));
-        builder.append(BOX_DRAWING_DOUBLE_VERTICAL_AND_LEFT_LINE_SEGMENT).append(NEW_LINE);
+        builder.append(
+                buildHorizontalBoundaryLine(LevelBoundary.MIDDLE, columnCount, maxColumnSize))
+                .append(NEW_LINE);
         return builder.toString();
     }
 
