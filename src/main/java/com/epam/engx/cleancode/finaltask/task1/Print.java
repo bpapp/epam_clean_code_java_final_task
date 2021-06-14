@@ -80,9 +80,7 @@ public class Print implements Command {
 
     private String getEmptyTable(String tableName) {
         String textEmptyTable = String.format("║ Table '%s' is empty or does not exist ║", tableName);
-        StringBuilder result = new StringBuilder();
-        result.append(composeEmptyTable(textEmptyTable));
-        return result.toString();
+        return composeEmptyTable(textEmptyTable);
     }
 
     private String composeEmptyTable(String textEmptyTable) {
@@ -94,11 +92,8 @@ public class Print implements Command {
     }
 
     private String getEmptyTableHeader(String textEmptyTable) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(
-                buildHorizontalBoundaryLine(LevelBoundary.UPPER, 1, textEmptyTable.length() - 2))
-                .append(NEW_LINE);
-        return builder.toString();
+        return buildHorizontalBoundaryLine(LevelBoundary.UPPER, 1, textEmptyTable.length() - 2)
+                .concat(NEW_LINE);
     }
 
     private String getEmptyTableBody(String textEmptyTable) {
@@ -106,11 +101,8 @@ public class Print implements Command {
     }
 
     private String getEmptyTableFooter(String textEmptyTable) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(
-                buildHorizontalBoundaryLine(LevelBoundary.BOTTOM, 1, textEmptyTable.length() - 2))
-                .append(NEW_LINE);
-        return builder.toString();
+        return buildHorizontalBoundaryLine(LevelBoundary.BOTTOM, 1, textEmptyTable.length() - 2)
+                .concat(NEW_LINE);
     }
 
     private String duplicateSymbol(String symbol, int times) {
@@ -155,7 +147,6 @@ public class Print implements Command {
         return dataSets.stream()
                 .map(DataSet::getValues)
                 .flatMap(List::stream)
-                //   .filter(sc -> sc instanceof String)
                 .map(String::valueOf)
                 .mapToInt(String::length)
                 .max();
@@ -175,10 +166,8 @@ public class Print implements Command {
     }
 
     private String buildTableBody(List<DataSet> dataSets) {
-        StringBuilder tableBody = new StringBuilder();
         int maxColumnSize = incrementMaxColumnSize(getMaxColumnSize(dataSets));
-        tableBody.append(composeAllRows(dataSets, maxColumnSize));
-        return tableBody.toString();
+        return composeAllRows(dataSets, maxColumnSize);
     }
 
     private String composeAllRows(List<DataSet> dataSets, int maxColumnSize) {
@@ -218,19 +207,13 @@ public class Print implements Command {
     }
 
     private String drawCellLowerPart(int maxColumnSize, int columnCount) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(
-                buildHorizontalBoundaryLine(LevelBoundary.MIDDLE, columnCount, maxColumnSize))
-                .append(NEW_LINE);
-        return builder.toString();
+        return buildHorizontalBoundaryLine(LevelBoundary.MIDDLE, columnCount, maxColumnSize)
+                .concat(NEW_LINE);
     }
 
     private String buildTableFooter(int maxColumnSize, int columnCount) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(
-                buildHorizontalBoundaryLine(LevelBoundary.BOTTOM, columnCount, maxColumnSize))
-                .append(NEW_LINE);
-        return builder.toString();
+        return buildHorizontalBoundaryLine(LevelBoundary.BOTTOM, columnCount, maxColumnSize)
+                .concat(NEW_LINE);
     }
 
     private String appendOneMoreSpaceToTableContent(int maxColumnSize, int valuesLength) {
@@ -273,7 +256,6 @@ public class Print implements Command {
         }
         result.append(VERTICAL_LINE_BORDER_SYMBOL).append(NEW_LINE);
 
-        //last string of the header
         if (hasDataSets(dataSets)) {
             result.append(drawCellLowerPart(maxColumnSize, columnCount));
         } else {
@@ -283,11 +265,8 @@ public class Print implements Command {
     }
 
     private String drawUpperPartOfHeader(int columnCount, int maxColumnSize) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(
-                buildHorizontalBoundaryLine(LevelBoundary.UPPER, columnCount, maxColumnSize))
-                .append(NEW_LINE);
-        return builder.toString();
+        return buildHorizontalBoundaryLine(LevelBoundary.UPPER, columnCount, maxColumnSize)
+                .concat(NEW_LINE);
     }
 
     private boolean isColumnNamesLengthEven(int columnNamesLength) {
