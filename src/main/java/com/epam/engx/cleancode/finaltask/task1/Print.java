@@ -22,6 +22,7 @@ public class Print implements Command {
     private static final int ONE_MORE_SPACE_VALUE = 1;
     private static final int FIRST_ELEM_IN_DATA_SET = 0;
     private static final int COLUMN_SEPARATOR_TIME = 1;
+    private static final int COLUMN_NUMBER_REDUCER = 1;
 
     private final View view;
     private final DatabaseManager manager;
@@ -119,10 +120,8 @@ public class Print implements Command {
     private String buildHorizontalBoundaryLine(LevelBoundary levelBoundary, int columnCount, int maxColumnSize) {
         StringBuilder builder = new StringBuilder();
         builder.append(levelBoundary.leftBoundary);
-        for (int j = 1; j < columnCount; j++) {
-            builder.append(duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, maxColumnSize));
-            builder.append(duplicateSymbol(levelBoundary.middleBoundary, COLUMN_SEPARATOR_TIME));
-        }
+        String cellBorder = duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, maxColumnSize);
+        builder.append(duplicateSymbol(cellBorder + levelBoundary.middleBoundary, columnCount - COLUMN_NUMBER_REDUCER));
         builder.append(composeHorizontalLine(maxColumnSize));
         builder.append(levelBoundary.rightBoundary);
         return builder.toString();
