@@ -17,8 +17,11 @@ public class Print implements Command {
     private static final int TABLE_NAME_INDEX = 1;
     private static final String SPACE = " ";
     private static final String PRINT_COMMAND = "print ";
+    private static final String EMPTY_TABLE_CONTENT = "║ Table '%s' is empty or does not exist ║";
     private static final int CORRECT_NUMBER_OF_PARAMETERS = 2;
     private static final int ONE_MORE_SPACE_VALUE = 1;
+    private static final int FIRST_ELEM_IN_DATA_SET = 0;
+    private static final int COLUMN_SEPARATOR_TIME = 1;
 
     private final View view;
     private final DatabaseManager manager;
@@ -51,9 +54,9 @@ public class Print implements Command {
 
     @Override
     public void process(String input) {
-        String[] commands = splitInputBySpace(input);
-        validateCommandLength(commands.length);
-        String tableName = commands[TABLE_NAME_INDEX];
+        String[] commandParts = splitInputBySpace(input);
+        validateCommandLength(commandParts.length);
+        String tableName = commandParts[TABLE_NAME_INDEX];
         List<DataSet> data = manager.getTableData(tableName);
         view.write(getTableString(data, tableName));
     }
@@ -79,7 +82,7 @@ public class Print implements Command {
     }
 
     private String getEmptyTable(String tableName) {
-        String textEmptyTable = String.format("║ Table '%s' is empty or does not exist ║", tableName);
+        String textEmptyTable = String.format(EMPTY_TABLE_CONTENT, tableName);
         return composeEmptyTable(textEmptyTable);
     }
 
@@ -117,8 +120,8 @@ public class Print implements Command {
         StringBuilder builder = new StringBuilder();
         builder.append(levelBoundary.leftBoundary);
         for (int j = 1; j < columnCount; j++) {
-            builder.append(composeHorizontalLine(maxColumnSize));
-            builder.append(levelBoundary.middleBoundary);
+            builder.append(duplicateSymbol(HORIZONTAL_LINE_BORDER_SYMBOL, maxColumnSize));
+            builder.append(duplicateSymbol(levelBoundary.middleBoundary, COLUMN_SEPARATOR_TIME));
         }
         builder.append(composeHorizontalLine(maxColumnSize));
         builder.append(levelBoundary.rightBoundary);
@@ -136,11 +139,9 @@ public class Print implements Command {
     }
 
     private OptionalInt getMaxLengthForColumNames(List<DataSet> dataSets) {
-        OptionalInt maxLength;
-        maxLength = dataSets.get(0).getColumnNames().stream()
+        return dataSets.get(FIRST_ELEM_IN_DATA_SET).getColumnNames().stream()
                 .mapToInt(String::length)
                 .max();
-        return maxLength;
     }
 
     private OptionalInt getMaxLengthForDataValues(List<DataSet> dataSets) {
